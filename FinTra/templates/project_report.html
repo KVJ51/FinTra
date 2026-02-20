@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Project Report</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Project Report - Business Details</h2>
+        <form method="POST" action="/project-report">
+            <label>Business Name:</label>
+            <input type="text" name="business_name" required>
+
+            <label>Incorporation Date:</label>
+            <input type="date" name="incorporation_date" required>
+
+            <label>Date of Business Start:</label>
+            <input type="date" name="business_start_date" required>
+
+            <label>Business Place:</label>
+            <input type="text" name="place" required>
+
+            <label>Team Leader:</label>
+            <input type="text" name="team_leader" required>
+
+            <label>Admin:</label>
+            <input type="text" name="admin" required>
+
+            <button type="submit">Next: Balance Sheet →</button>
+        </form>
+    </div>
+</body>
+</html>

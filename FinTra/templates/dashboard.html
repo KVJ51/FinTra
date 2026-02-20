@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FinTra | Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>💼 FinTra Dashboard</h1>
+
+        <div class="actions">
+            <a href="/add-income" class="btn">➕ Add Income</a>
+            <a href="/add-expense" class="btn">➖ Add Expense</a>
+        </div>
+
+        <div class="summary">
+            <h2>Monthly Summary</h2>
+            <p>Total Income: ₹[to be filled]</p>
+            <p>Total Expenses: ₹[to be filled]</p>
+            <p><strong>Balance:</strong> ₹[to be filled]</p>
+        </div>
+
+        <div class="chart">
+            <!-- Placeholder for future Chart.js -->
+            <h3>Spending Breakdown</h3>
+            <canvas id="expenseChart"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Sensitive environment variables
+.env
+
+# Python virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# Local Database
+fintra.db
+
+# OS specific files
+.DS_Store
+Thumbs.db

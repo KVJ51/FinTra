@@ -1,0 +1,117 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20230630/pngtree-d-rendering-of-a-glowing-digital-business-interface-showcasing-finance-innovation-image_3694007.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    backdrop-filter: blur(4px);
+}
+
+.container {
+    max-width: 700px;
+    margin: 60px auto;
+    background-color: rgba(0, 0, 0, 0.75); /* Soft black glass effect */
+    padding: 30px 40px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+    border-radius: 16px;
+    color: #fff;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #f8f9fa;
+    font-size: 32px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #666;
+    padding-bottom: 10px;
+    text-shadow: 1px 1px 2px #000;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+ul li {
+    margin-bottom: 15px;
+}
+
+ul li a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    background-color: #007BFF;
+    color: white !important;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color 0.3s ease-in-out, transform 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+ul li a:hover {
+    background-color: #0056b3;
+    transform: scale(1.03);
+    color: #fff !important;
+}
+
+ul li {
+    margin-bottom: 20px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #ddd;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="date"],
+form textarea,
+form select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #444;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 10px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease-in-out, background-color 0.3s;
+}
+
+form input:focus,
+form textarea:focus,
+form select:focus {
+    border-color: #00d4ff;
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #007BFF, #00BFFF);
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease-in-out, transform 0.2s;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #0056b3, #0099cc);
+    transform: scale(1.03);
+}

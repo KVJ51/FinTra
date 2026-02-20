@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simplified Balance Sheet</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Projected Balance Sheet</h2>
+        <form method="POST" action="/balance-sheet">
+            <h3>Liabilities</h3>
+            <label for="promoters_capital">Promoters Capital</label>
+            <input type="number" step="0.01" name="promoters_capital" required>
+
+            <label for="term_loan">Loans (Combined)</label>
+            <input type="number" step="0.01" name="term_loan" required>
+
+            <label for="current_liabilities">Current Liabilities</label>
+            <input type="number" step="0.01" name="current_liabilities" required>
+
+            <h3>Assets</h3>
+            <label for="fixed_assets">Fixed Assets</label>
+            <input type="number" step="0.01" name="fixed_assets" required>
+
+            <label for="cash">Cash in Bank/Hand</label>
+            <input type="number" step="0.01" name="cash" required>
+
+            <label for="receivables">Receivables</label>
+            <input type="number" step="0.01" name="receivables" required>
+
+            <label for="stock">Stock</label>
+            <input type="number" step="0.01" name="stock" required>
+
+            <button type="submit">Next: Profit & Loss</button>
+        </form>
+    </div>
+</body>
+</html>
