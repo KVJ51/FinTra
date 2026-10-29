@@ -1,148 +1,450 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Financial Summary</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <div class="container">
-        <h2>📊 Financial Summary</h2>
+{% extends "base.html" %}
 
-        <section>
-            <h3>🗂 Project Report</h3>
-            <ul>
-                <li><strong>Business Name:</strong> {{ project_data["business_name"] }}</li>
-                <li><strong>Incorporation Date:</strong> {{ project_data["incorporation_date"] }}</li>
-                <li><strong>Business Start Date:</strong> {{ project_data["business_start_date"] }}</li>
-                <li><strong>Place:</strong> {{ project_data["place"] }}</li>
-                <li><strong>Team Leader:</strong> {{ project_data["team_leader"] }}</li>
-                <li><strong>Admin:</strong> {{ project_data["admin"] }}</li>
-                <li><strong>Production:</strong> {{ project_data["production"] }}</li>
-                <li><strong>Supply Chain:</strong> {{ project_data["supply_chain"] }}</li>
-                <li><strong>Marketing:</strong> {{ project_data["marketing"] }}</li>
-                <li><strong>Plant Maintenance:</strong> {{ project_data["maintenance"] }}</li>
-            </ul>
-        </section>
+{% block title %}FinTra - Financial Audit Summary & Report{% endblock %}
 
-        <section>
-            <h3>📑 Projected Balance Sheet</h3>
-            <ul>
-                {% for key, value in balance_data.items() %}
-                    <li><strong>{{ key.replace("_", " ").title() }}:</strong> ₹{{ value }}</li>
-                {% endfor %}
-            </ul>
-            <p><strong>Total Liabilities:</strong> ₹{{ total_liabilities }}</p>
-            <p><strong>Total Assets:</strong> ₹{{ total_assets }}</p>
-        </section>
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+@media print {
+    .fintra-navbar, .fintra-footer, .no-print {
+        display: none !important;
+    }
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+    .fintra-card {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+    }
+    .metric-card {
+        background: #f8fafc !important;
+        border: 1px solid #ddd !important;
+        color: #000 !important;
+    }
+    .text-white { color: #000000 !important; }
+    .text-secondary, .text-muted { color: #555555 !important; }
+}
+</style>
+{% endblock %}
 
-        <section>
-            <h3>💼 Profit and Loss Account</h3>
-            <ul>
-                {% for key, value in profit_loss_data.items() %}
-                    <li><strong>{{ key.replace("_", " ").title() }}:</strong> ₹{{ value }}</li>
-                {% endfor %}
-            </ul>
-            <p><strong>Gross Profit:</strong> ₹{{ gross_profit }}</p>
-            <p><strong>Net Profit Margin:</strong> {{ net_profit_margin }}%</p>
-        </section>
+{% block content %}
+<div class="container-fluid px-lg-5 py-3">
 
-        <section>
-            <h3>💸 Spending vs Profit</h3>
-            <canvas id="spendingChart" width="400" height="200"></canvas>
-        </section>
-
-        <section>
-            <h3 class="mt-5">🔮 Financial Forecast (Next 6 Months)</h3>
-            <canvas id="predictionChart" width="400" height="200"></canvas>
-        </section>
+    <!-- Top Action Banner -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 no-print">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-success-subtle text-success border border-success px-2 py-1 fs-xs">
+                    <i class="bi bi-shield-check me-1"></i> Audit Passed & Generated
+                </span>
+                <span class="text-secondary fs-xs">Report ID: #FTR-{{ project_data.get('business_name', 'MSME')[:4]|upper }}-2026</span>
+            </div>
+            <h2 class="fw-bold text-white mb-0">
+                <i class="bi bi-pie-chart-fill text-info me-2"></i>Financial Audit & Executive Report
+            </h2>
+            <p class="text-secondary fs-sm mb-0">Entity: <strong class="text-white">{{ project_data.get('business_name', 'Unregistered Entity') }}</strong> | Location: {{ project_data.get('place', 'Headquarters') }}</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button onclick="window.print()" class="btn btn-outline-light rounded-pill px-3 py-2 fs-sm">
+                <i class="bi bi-printer me-1"></i> Print / PDF Export
+            </button>
+            <a href="/project-report" class="btn btn-outline-info rounded-pill px-3 py-2 fs-sm">
+                <i class="bi bi-pencil-square me-1"></i> Edit Data
+            </a>
+            <a href="/chatbot" class="btn btn-fintra-primary rounded-pill px-3 py-2 fs-sm">
+                <i class="bi bi-robot me-1"></i> Consult AI Advisor
+            </a>
+            <a href="/reset-data" class="btn btn-outline-danger rounded-pill px-3 py-2 fs-sm" onclick="return confirm('Clear current report data and start fresh?');">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+            </a>
+        </div>
     </div>
 
-    <script>            
-        const sales = parseFloat('{{ profit_loss_data.get("sales", 0) }}');    
-        const production_cost = parseFloat('{{ profit_loss_data.get("production_cost", 0) }}');    
-        const salary = parseFloat('{{ profit_loss_data.get("salary", 0) }}');    
-        const overheads = parseFloat('{{ profit_loss_data.get("overheads", 0) }}');    
-        const net_profit = parseFloat('{{ profit_loss_data.get("net_profit", 0) }}');
+    <!-- Executive Health Score & Key Ratios Grid -->
+    <div class="row g-3 mb-4">
+        <!-- Health Score -->
+        <div class="col-12 col-md-4 col-xl-2">
+            <div class="metric-card {% if metrics.health_score >= 75 %}success{% elif metrics.health_score >= 50 %}warning{% else %}danger{% endif %} text-center">
+                <div class="metric-title">Health Score</div>
+                <div class="metric-value text-gradient fs-1">{{ metrics.health_score }}/100</div>
+                <span class="metric-badge {% if metrics.health_score >= 75 %}bg-success-subtle text-success{% elif metrics.health_score >= 50 %}bg-warning-subtle text-warning{% else %}bg-danger-subtle text-danger{% endif %}">
+                    {% if metrics.health_score >= 75 %}Excellent Health{% elif metrics.health_score >= 50 %}Moderate Risk{% else %}High Risk Alert{% endif %}
+                </span>
+            </div>
+        </div>
 
-        const expenses = production_cost + salary + overheads;
+        <!-- Net Profit Margin -->
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="metric-card {% if metrics.net_profit_margin >= 15 %}success{% elif metrics.net_profit_margin > 0 %}warning{% else %}danger{% endif %}">
+                <div class="metric-title">Net Margin</div>
+                <div class="metric-value">{{ metrics.net_profit_margin }}%</div>
+                <span class="metric-badge bg-secondary-subtle text-secondary">
+                    Industry: 10-15%
+                </span>
+            </div>
+        </div>
 
-        const ctx = document.getElementById("spendingChart").getContext("2d");
-        new Chart(ctx, {
+        <!-- Gross Margin -->
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="metric-card success">
+                <div class="metric-title">Gross Margin</div>
+                <div class="metric-value">{{ metrics.gross_profit_margin }}%</div>
+                <span class="metric-badge bg-success-subtle text-success">
+                    Markup Spread
+                </span>
+            </div>
+        </div>
+
+        <!-- Current Ratio -->
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="metric-card {% if 1.3 <= metrics.current_ratio <= 2.5 %}success{% else %}warning{% endif %}">
+                <div class="metric-title">Current Ratio</div>
+                <div class="metric-value">{{ metrics.current_ratio }}x</div>
+                <span class="metric-badge {% if 1.3 <= metrics.current_ratio <= 2.5 %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %}">
+                    {% if 1.3 <= metrics.current_ratio <= 2.5 %}Healthy Liquidity{% else %}Check Working Cap{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Debt-to-Equity -->
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="metric-card {% if metrics.debt_to_equity <= 2.0 %}success{% else %}danger{% endif %}">
+                <div class="metric-title">Debt to Equity</div>
+                <div class="metric-value">{{ metrics.debt_to_equity }}x</div>
+                <span class="metric-badge bg-secondary-subtle text-secondary">
+                    Target: &lt; 2.0x
+                </span>
+            </div>
+        </div>
+
+        <!-- Working Capital -->
+        <div class="col-12 col-md-4 col-xl-2">
+            <div class="metric-card {% if metrics.working_capital >= 0 %}success{% else %}danger{% endif %}">
+                <div class="metric-title">Working Capital</div>
+                <div class="metric-value fs-5">₹{{ "{:,.0f}".format(metrics.working_capital) }}</div>
+                <span class="metric-badge {% if metrics.working_capital >= 0 %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %}">
+                    {% if metrics.working_capital >= 0 %}Positive Cushion{% else %}Deficit Alert{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Golden Equation Validation Alert -->
+    <div class="fintra-card mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <span class="brand-icon {% if metrics.is_balanced %}bg-success{% else %}bg-warning{% endif %}">
+                    <i class="bi {% if metrics.is_balanced %}bi-check-circle-fill{% else %}bi-exclamation-diamond-fill{% endif %} text-white"></i>
+                </span>
+                <div>
+                    <h5 class="fw-bold mb-1 text-white">
+                        Accounting Equation Integrity: Total Assets vs. (Liabilities + Equity)
+                    </h5>
+                    <p class="fs-sm text-secondary mb-0">
+                        Total Assets: <strong class="text-success">₹{{ "{:,.2f}".format(metrics.total_assets) }}</strong> | 
+                        Liabilities + Equity: <strong class="text-warning">₹{{ "{:,.2f}".format(metrics.total_equity_and_liabilities) }}</strong>
+                    </p>
+                </div>
+            </div>
+            <div>
+                {% if metrics.is_balanced %}
+                <span class="badge bg-success px-3 py-2 fs-6 rounded-pill">
+                    <i class="bi bi-shield-check me-1"></i> Balance Sheet Reconciled (Variance: ₹0.00)
+                </span>
+                {% else %}
+                <span class="badge bg-warning text-dark px-3 py-2 fs-6 rounded-pill">
+                    <i class="bi bi-exclamation-triangle me-1"></i> Variance: ₹{{ "{:,.2f}".format(metrics.balance_variance|abs) }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Spending vs Net Profit Bar Chart -->
+        <div class="col-12 col-lg-6">
+            <div class="fintra-card h-100">
+                <div class="fintra-card-header">
+                    <h5 class="fw-bold mb-0 text-white"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Revenue, Cost & Profit Comparison</h5>
+                    <span class="badge bg-primary-subtle text-primary">Annualized</span>
+                </div>
+                <div style="min-height: 280px;">
+                    <canvas id="spendingChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6-Month Predictive Financial Forecast Line Chart -->
+        <div class="col-12 col-lg-6">
+            <div class="fintra-card h-100">
+                <div class="fintra-card-header">
+                    <h5 class="fw-bold mb-0 text-white"><i class="bi bi-graph-up text-success me-2"></i>6-Month Predictive Financial Forecast</h5>
+                    <span class="badge bg-success-subtle text-success">Trend Model</span>
+                </div>
+                <div style="min-height: 280px;">
+                    <canvas id="predictionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparative 3-Statement Breakdown Tables -->
+    <div class="row g-4 mb-4">
+        <!-- Business & Leadership Profile -->
+        <div class="col-12 col-lg-4">
+            <div class="fintra-card h-100">
+                <div class="fintra-card-header">
+                    <h5 class="fw-bold mb-0 text-white"><i class="bi bi-building text-info me-2"></i>Entity & Leadership</h5>
+                </div>
+                <table class="fintra-table">
+                    <tbody>
+                        <tr><td class="text-secondary">Business Name</td><td class="fw-bold text-white text-end">{{ project_data.get('business_name', '—') }}</td></tr>
+                        <tr><td class="text-secondary">Location</td><td class="text-end">{{ project_data.get('place', '—') }}</td></tr>
+                        <tr><td class="text-secondary">Incorporation</td><td class="text-end">{{ project_data.get('incorporation_date', '—') }}</td></tr>
+                        <tr><td class="text-secondary">Start Date</td><td class="text-end">{{ project_data.get('business_start_date', '—') }}</td></tr>
+                        <tr><td class="text-secondary">Team Leader / CEO</td><td class="text-end">{{ project_data.get('team_leader', '—') }}</td></tr>
+                        <tr><td class="text-secondary">Admin & Ops</td><td class="text-end">{{ project_data.get('admin', '—') }}</td></tr>
+                        <tr><td class="text-secondary">Technical Head</td><td class="text-end">{{ project_data.get('production', '—') }}</td></tr>
+                        <tr><td class="text-secondary">Marketing Lead</td><td class="text-end">{{ project_data.get('marketing', '—') }}</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Balance Sheet Statement -->
+        <div class="col-12 col-lg-4">
+            <div class="fintra-card h-100">
+                <div class="fintra-card-header">
+                    <h5 class="fw-bold mb-0 text-white"><i class="bi bi-file-earmark-spreadsheet text-primary me-2"></i>Projected Balance Sheet</h5>
+                </div>
+                <table class="fintra-table">
+                    <tbody>
+                        <tr class="table-active"><td colspan="2" class="fw-bold text-success fs-xs text-uppercase">Assets</td></tr>
+                        <tr><td class="text-secondary">Fixed Assets</td><td class="text-end fw-semibold">₹{{ "{:,.2f}".format(metrics.fixed_assets) }}</td></tr>
+                        <tr><td class="text-secondary">Cash in Bank / Hand</td><td class="text-end fw-semibold">₹{{ "{:,.2f}".format(metrics.cash) }}</td></tr>
+                        <tr><td class="text-secondary">Receivables</td><td class="text-end fw-semibold">₹{{ "{:,.2f}".format(metrics.receivables) }}</td></tr>
+                        <tr><td class="text-secondary">Stock & Inventory</td><td class="text-end fw-semibold">₹{{ "{:,.2f}".format(metrics.stock) }}</td></tr>
+                        <tr class="border-top border-secondary"><td class="fw-bold text-white">Total Assets</td><td class="text-end fw-bold text-success">₹{{ "{:,.2f}".format(metrics.total_assets) }}</td></tr>
+
+                        <tr class="table-active"><td colspan="2" class="fw-bold text-warning fs-xs text-uppercase pt-3">Liabilities & Capital</td></tr>
+                        <tr><td class="text-secondary">Promoters Capital</td><td class="text-end fw-semibold">₹{{ "{:,.2f}".format(metrics.promoters_capital) }}</td></tr>
+                        <tr><td class="text-secondary">Term Loans</td><td class="text-end fw-semibold">₹{{ "{:,.2f}".format(metrics.loans) }}</td></tr>
+                        <tr><td class="text-secondary">Current Liabilities</td><td class="text-end fw-semibold">₹{{ "{:,.2f}".format(metrics.current_liabilities) }}</td></tr>
+                        <tr class="border-top border-secondary"><td class="fw-bold text-white">Total Liab. + Equity</td><td class="text-end fw-bold text-warning">₹{{ "{:,.2f}".format(metrics.total_equity_and_liabilities) }}</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Profit & Loss Statement -->
+        <div class="col-12 col-lg-4">
+            <div class="fintra-card h-100">
+                <div class="fintra-card-header">
+                    <h5 class="fw-bold mb-0 text-white"><i class="bi bi-briefcase text-success me-2"></i>Profit & Loss Account</h5>
+                </div>
+                <table class="fintra-table">
+                    <tbody>
+                        <tr><td class="text-secondary">Commercial Sales Revenue</td><td class="text-end fw-bold text-info">₹{{ "{:,.2f}".format(metrics.sales) }}</td></tr>
+                        <tr><td class="text-secondary">Less: Production Cost (COGS)</td><td class="text-end text-danger">-₹{{ "{:,.2f}".format(metrics.production_cost) }}</td></tr>
+                        <tr class="border-top border-secondary"><td class="fw-bold text-white">Gross Profit</td><td class="text-end fw-bold text-info">₹{{ "{:,.2f}".format(metrics.gross_profit) }}</td></tr>
+                        <tr><td class="text-secondary">Less: Salaries & Payroll</td><td class="text-end text-danger">-₹{{ "{:,.2f}".format(metrics.salary) }}</td></tr>
+                        <tr><td class="text-secondary">Less: General Overheads</td><td class="text-end text-danger">-₹{{ "{:,.2f}".format(metrics.overheads) }}</td></tr>
+                        <tr><td class="text-secondary">Less: Loan Interest & Other</td><td class="text-end text-danger">-₹{{ "{:,.2f}".format(metrics.other_expenses) }}</td></tr>
+                        <tr class="border-top border-secondary"><td class="fw-bold text-white">Total Operating Expenses</td><td class="text-end fw-bold text-danger">-₹{{ "{:,.2f}".format(metrics.total_expenses) }}</td></tr>
+                        <tr class="table-active"><td class="fw-bold text-white fs-6">Net Profit After Tax (PAT)</td><td class="text-end fw-bold text-success fs-5">₹{{ "{:,.2f}".format(metrics.net_profit) }}</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Autonomous AI Financial Expert Audit & Recommendations -->
+    <div class="fintra-card mb-4">
+        <div class="fintra-card-header">
+            <div class="d-flex align-items-center gap-2">
+                <span class="brand-icon bg-warning bg-gradient text-dark"><i class="bi bi-robot"></i></span>
+                <div>
+                    <h5 class="fw-bold mb-0 text-white">FinTra Autonomous Financial Expert Advisory</h5>
+                    <p class="fs-xs text-secondary mb-0">Automated diagnostic recommendations generated based on your company's live financial figures.</p>
+                </div>
+            </div>
+            <a href="/chatbot" class="btn btn-sm btn-fintra-primary rounded-pill px-3">
+                <i class="bi bi-chat-quote-fill me-1"></i> Interactive Financial Chatbot
+            </a>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-25 h-100">
+                    <h6 class="fw-bold text-info mb-2"><i class="bi bi-droplet-half me-1"></i> 1. Liquidity & Cash Runway</h6>
+                    <p class="fs-sm text-secondary mb-0">
+                        {% if metrics.current_ratio >= 1.5 %}
+                        Your Current Ratio of {{ metrics.current_ratio }}x is within the institutional safety corridor (1.5 - 2.0x). Your liquid assets cover near-term obligations comfortably.
+                        {% else %}
+                        Current Ratio is {{ metrics.current_ratio }}x. Maintain tight accounts receivable collection to avoid working capital compression during inventory renewal cycles.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-25 h-100">
+                    <h6 class="fw-bold text-success mb-2"><i class="bi bi-graph-up-arrow me-1"></i> 2. Profitability Optimization</h6>
+                    <p class="fs-sm text-secondary mb-0">
+                        {% if metrics.net_profit_margin >= 15 %}
+                        Strong Net Margin of {{ metrics.net_profit_margin }}%. Reinvest a portion of free operating cash into high-ROI marketing or automated production lines.
+                        {% else %}
+                        Net Margin is {{ metrics.net_profit_margin }}%. Target renegotiating raw material bulk pricing or reducing non-critical software subscriptions to expand margin toward 15%.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-25 h-100">
+                    <h6 class="fw-bold text-warning mb-2"><i class="bi bi-shield-lock me-1"></i> 3. Capital Structure & Leverage</h6>
+                    <p class="fs-sm text-secondary mb-0">
+                        {% if metrics.debt_to_equity <= 1.5 %}
+                        Debt-to-Equity is conservative at {{ metrics.debt_to_equity }}x. The business has substantial headroom to access working capital loans or bank credit lines if scaling up.
+                        {% else %}
+                        Debt-to-Equity is {{ metrics.debt_to_equity }}x. Prioritize paying down high-interest credit lines to reduce annual finance charges.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const sales = {{ metrics.sales }};
+    const expenses = {{ metrics.total_expenses }};
+    const net_profit = {{ metrics.net_profit }};
+
+    // 1. Spending vs Net Profit Chart
+    const ctxBar = document.getElementById("spendingChart");
+    if (ctxBar) {
+        new Chart(ctxBar.getContext("2d"), {
             type: "bar",
             data: {
-                labels: ["Sales", "Expenses", "Net Profit"],
+                labels: ["Total Sales", "Total Expenses", "Net PAT"],
                 datasets: [{
                     label: "Amount (₹)",
                     data: [sales, expenses, net_profit],
                     backgroundColor: [
-                        "rgba(54, 162, 235, 0.7)",
-                        "rgba(255, 99, 132, 0.7)",
-                        "rgba(75, 192, 192, 0.7)"
-                    ]
+                        "rgba(0, 128, 255, 0.75)",
+                        "rgba(239, 68, 68, 0.75)",
+                        net_profit >= 0 ? "rgba(16, 185, 129, 0.8)" : "rgba(239, 68, 68, 0.8)"
+                    ],
+                    borderColor: [
+                        "#0080ff",
+                        "#ef4444",
+                        net_profit >= 0 ? "#10b981" : "#ef4444"
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 8
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false }
                 },
                 scales: {
-                    y: { beginAtZero: true }
+                    x: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#94a3b8',
+                            callback: function(value) { return '₹' + value.toLocaleString('en-IN'); }
+                        },
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                    }
                 }
             }
         });
+    }
 
-        // 📈 Forecast Chart
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-        const predicted_income = [sales, sales * 1.1, sales * 1.15, sales * 1.2, sales * 1.25, sales * 1.3];
-        const predicted_expenses = [expenses, expenses * 1.05, expenses * 1.1, expenses * 1.15, expenses * 1.2, expenses * 1.25];
-        const predicted_profit = predicted_income.map((income, i) => income - predicted_expenses[i]);
+    // 2. 6-Month Predictive Financial Forecast Line Chart
+    const ctxLine = document.getElementById("predictionChart");
+    if (ctxLine) {
+        const months = ['Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6'];
+        const predicted_income = [sales, sales * 1.06, sales * 1.12, sales * 1.18, sales * 1.25, sales * 1.32];
+        const predicted_expenses = [expenses, expenses * 1.03, expenses * 1.06, expenses * 1.09, expenses * 1.12, expenses * 1.16];
+        const predicted_profit = predicted_income.map((inc, i) => inc - predicted_expenses[i]);
 
-        const predictionCtx = document.getElementById("predictionChart").getContext("2d");
-        new Chart(predictionCtx, {
+        new Chart(ctxLine.getContext("2d"), {
             type: 'line',
             data: {
                 labels: months,
                 datasets: [
                     {
-                        label: 'Predicted Income',
+                        label: 'Projected Revenue',
                         data: predicted_income,
-                        borderColor: 'green',
-                        backgroundColor: 'rgba(0, 128, 0, 0.1)',
+                        borderColor: '#00d4ff',
+                        backgroundColor: 'rgba(0, 212, 255, 0.1)',
                         fill: true,
-                        tension: 0.4
+                        tension: 0.35,
+                        borderWidth: 2.5
                     },
                     {
-                        label: 'Predicted Expenses',
+                        label: 'Projected Expenses',
                         data: predicted_expenses,
-                        borderColor: 'red',
-                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.05)',
                         fill: true,
-                        tension: 0.4
+                        tension: 0.35,
+                        borderWidth: 2.5
                     },
                     {
-                        label: 'Predicted Profit',
+                        label: 'Projected Net Profit',
                         data: predicted_profit,
-                        borderColor: 'blue',
-                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         fill: true,
-                        tension: 0.4
+                        tension: 0.35,
+                        borderWidth: 2.5
                     }
                 ]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
-                    title: {
-                        display: true,
-                        text: 'Financial Trend Forecast',
-                        font: { size: 18 }
+                    legend: {
+                        position: 'top',
+                        labels: { color: '#94a3b8' }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#94a3b8',
+                            callback: function(value) { return '₹' + value.toLocaleString('en-IN'); }
+                        },
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' }
                     }
                 }
             }
         });
-    </script>
-</body>
-</html>
+    }
+});
+</script>
+{% endblock %}

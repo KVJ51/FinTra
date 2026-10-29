@@ -1,34 +1,244 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>FinTra | Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>💼 FinTra Dashboard</h1>
+{% extends "base.html" %}
 
-        <div class="actions">
-            <a href="/add-income" class="btn">➕ Add Income</a>
-            <a href="/add-expense" class="btn">➖ Add Expense</a>
+{% block title %}FinTra - Financial Command Center & Ledger{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5">
+    
+    <!-- Header with Quick Action Bar -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-speedometer2 text-info me-2"></i>Financial Command Center</h2>
+            <p class="text-secondary mb-0">Real-time ledger tracking, expense categorization, and business solvency diagnostics.</p>
         </div>
-
-        <div class="summary">
-            <h2>Monthly Summary</h2>
-            <p>Total Income: ₹[to be filled]</p>
-            <p>Total Expenses: ₹[to be filled]</p>
-            <p><strong>Balance:</strong> ₹[to be filled]</p>
-        </div>
-
-        <div class="chart">
-            <!-- Placeholder for future Chart.js -->
-            <h3>Spending Breakdown</h3>
-            <canvas id="expenseChart"></canvas>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/add-income" class="btn btn-success rounded-pill px-3 py-2 fw-semibold">
+                <i class="bi bi-plus-circle-fill me-1"></i> Add Income
+            </a>
+            <a href="/add-expense" class="btn btn-danger rounded-pill px-3 py-2 fw-semibold">
+                <i class="bi bi-dash-circle-fill me-1"></i> Add Expense
+            </a>
+            <a href="/project-report" class="btn btn-fintra-primary rounded-pill px-3 py-2">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Filing Wizard
+            </a>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+    <!-- Live KPI Metrics Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="metric-card success">
+                <div class="metric-title"><i class="bi bi-arrow-down-left-circle me-1"></i> Total Income</div>
+                <div class="metric-value">₹{{ "{:,.2f}".format(total_income) }}</div>
+                <span class="metric-badge bg-success-subtle text-success">
+                    <i class="bi bi-check-circle"></i> Operational Inflows
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="metric-card danger">
+                <div class="metric-title"><i class="bi bi-arrow-up-right-circle me-1"></i> Total Expenses</div>
+                <div class="metric-value">₹{{ "{:,.2f}".format(total_expense) }}</div>
+                <span class="metric-badge bg-danger-subtle text-danger">
+                    <i class="bi bi-graph-down-arrow"></i> Recorded Outflows
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="metric-card {% if net_balance >= 0 %}success{% else %}danger{% endif %}">
+                <div class="metric-title"><i class="bi bi-wallet2 me-1"></i> Net Cash Position</div>
+                <div class="metric-value">₹{{ "{:,.2f}".format(net_balance) }}</div>
+                <span class="metric-badge {% if net_balance >= 0 %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %}">
+                    {% if net_balance >= 0 %}Positive Reserve{% else %}Deficit Alert{% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="metric-card warning">
+                <div class="metric-title"><i class="bi bi-pie-chart me-1"></i> Operating Margin</div>
+                {% set margin_rate = (net_balance / total_income * 100) if total_income > 0 else 0 %}
+                <div class="metric-value">{{ "{:.1f}%".format(margin_rate) }}</div>
+                <span class="metric-badge bg-warning-subtle text-warning">
+                    Cashflow Efficiency
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spending Breakdown & Quick Launcher Showcase -->
+    <div class="row g-4 mb-4">
+        <!-- Chart: Spending Distribution -->
+        <div class="col-12 col-lg-6">
+            <div class="fintra-card h-100">
+                <div class="fintra-card-header">
+                    <h5 class="fw-bold mb-0 text-white"><i class="bi bi-pie-chart-fill text-primary me-2"></i>Expense Breakdown by Category</h5>
+                    <span class="badge bg-secondary-subtle text-secondary">Distribution</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-center p-3" style="min-height: 280px;">
+                    {% if cat_labels and cat_labels|length > 0 %}
+                        <canvas id="expenseChart" style="max-height: 260px; max-width: 400px;"></canvas>
+                    {% else %}
+                        <div class="text-center text-muted">
+                            <i class="bi bi-bar-chart-steps fs-1 d-block mb-2"></i>
+                            No expenses recorded yet. Click "Add Expense" to track your spending.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- FinTra Architecture Showcase & Quick Launcher -->
+        <div class="col-12 col-lg-6">
+            <div class="fintra-card h-100">
+                <div class="fintra-card-header">
+                    <h5 class="fw-bold mb-0 text-white"><i class="bi bi-stars text-warning me-2"></i>FinTra Interface Preview & Assets</h5>
+                    <a href="/load-demo-data" class="btn btn-sm btn-outline-info rounded-pill">
+                        <i class="bi bi-magic me-1"></i> Try Demo Report
+                    </a>
+                </div>
+                <div class="row align-items-center g-3">
+                    <div class="col-sm-5 text-center">
+                        <img src="{{ url_for('static', filename='assets/fintra_preview.png') }}" alt="FinTra Preview" class="img-fluid rounded-4 shadow-lg border border-secondary" style="max-height: 200px; object-fit: contain;">
+                    </div>
+                    <div class="col-sm-7">
+                        <h6 class="fw-bold text-white mb-2">Built for Small Business & MSMEs</h6>
+                        <p class="fs-sm text-secondary mb-3">
+                            FinTra automates dual financial workflows: real-time cash ledger management and complete 3-statement project auditing (Balance Sheet, P&L, Health Ratios).
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="/" class="btn btn-sm btn-fintra-primary rounded-pill px-3">
+                                <i class="bi bi-phone me-1"></i> Mobile Launcher
+                            </a>
+                            <a href="/chatbot" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                                <i class="bi bi-chat-quote me-1"></i> AI Advisory
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Ledger Table -->
+    <div class="fintra-card" id="ledger">
+        <div class="fintra-card-header">
+            <div>
+                <h5 class="fw-bold mb-1 text-white"><i class="bi bi-receipt-cutoff text-success me-2"></i>Transactions Ledger</h5>
+                <p class="text-secondary fs-sm mb-0">All recorded cash inflows and operational outflows.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/add-income" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                    <i class="bi bi-plus-lg me-1"></i> Record Income
+                </a>
+                <a href="/add-expense" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                    <i class="bi bi-dash-lg me-1"></i> Record Expense
+                </a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="fintra-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Source / Payee</th>
+                        <th>Notes</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                    <tr>
+                        <td class="text-secondary fs-sm">{{ tx['date'] }}</td>
+                        <td>
+                            {% if tx['type'] == 'income' %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                    <i class="bi bi-arrow-down-left me-1"></i> Income
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                                    <i class="bi bi-arrow-up-right me-1"></i> Expense
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td><span class="fw-semibold text-white">{{ tx['category'] }}</span></td>
+                        <td>{{ tx['source_payee'] }}</td>
+                        <td class="text-muted fs-sm">{{ tx['notes'] or '—' }}</td>
+                        <td class="text-end fw-bold {% if tx['type'] == 'income' %}text-success{% else %}text-danger{% endif %}">
+                            {% if tx['type'] == 'income' %}+{% else %}-{% endif %}₹{{ "{:,.2f}".format(tx['amount']) }}
+                        </td>
+                        <td class="text-center">
+                            <form method="POST" action="/transactions/delete/{{ tx['id'] }}" onsubmit="return confirm('Delete this transaction?');" style="display:inline;">
+                                <button type="submit" class="btn btn-link text-muted p-0 hover-danger" title="Delete">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                            No transactions found. Add your first income or expense above!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const labels = {{ cat_labels | tojson }};
+    const values = {{ cat_values | tojson }};
+
+    if (labels && labels.length > 0) {
+        const ctx = document.getElementById('expenseChart');
+        if (ctx) {
+            new Chart(ctx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            '#0080ff', '#10b981', '#f59e0b', '#ef4444', 
+                            '#8b5cf6', '#06b6d4', '#ec4899', '#64748b'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#0d1424'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#94a3b8',
+                                boxWidth: 12,
+                                padding: 12,
+                                font: { family: "'Plus Jakarta Sans', sans-serif" }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+});
+</script>
+{% endblock %}

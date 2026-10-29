@@ -1,117 +1,620 @@
+/* ==========================================================================
+   FinTra - Modern Fintech UI & Glassmorphism Design System
+   ========================================================================== */
+
+:root {
+    --fintra-bg: #070d1e;
+    --fintra-primary: #0080ff;
+    --fintra-primary-hover: #0066cc;
+    --fintra-accent: #00d4ff;
+    --fintra-cyan: #0df3ff;
+    --fintra-success: #10b981;
+    --fintra-danger: #ef4444;
+    --fintra-warning: #f59e0b;
+    --fintra-purple: #8b5cf6;
+    
+    --card-bg-glass: rgba(13, 20, 36, 0.78);
+    --card-border-glass: rgba(255, 255, 255, 0.12);
+    --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20230630/pngtree-d-rendering-of-a-glowing-digital-business-interface-showcasing-finance-innovation-image_3694007.jpg');
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--fintra-bg);
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 128, 255, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 40%),
+        linear-gradient(to bottom, rgba(7, 13, 30, 0.85), rgba(7, 13, 30, 0.95)),
+        url('/static/assets/fintech_bg.jpg');
     background-size: cover;
-    background-position: center;
+    background-position: center center;
     background-attachment: fixed;
-    color: #fff;
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     margin: 0;
     padding: 0;
-    backdrop-filter: blur(4px);
+    overflow-x: hidden;
 }
 
-.container {
-    max-width: 700px;
-    margin: 60px auto;
-    background-color: rgba(0, 0, 0, 0.75); /* Soft black glass effect */
-    padding: 30px 40px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-    border-radius: 16px;
-    color: #fff;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(10, 15, 30, 0.8);
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 128, 255, 0.4);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 212, 255, 0.7);
 }
 
-h1, h2 {
-    text-align: center;
-    color: #f8f9fa;
-    font-size: 32px;
-    margin-bottom: 30px;
-    border-bottom: 2px solid #666;
-    padding-bottom: 10px;
-    text-shadow: 1px 1px 2px #000;
+/* Typography Utilities */
+.fs-xs { font-size: 0.75rem; }
+.fs-sm { font-size: 0.875rem; }
+.hover-light:hover { color: #f1f5f9 !important; }
+
+/* Modern Top Navigation Bar */
+.fintra-navbar {
+    background: rgba(8, 14, 30, 0.82);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--card-border-glass);
+    padding: 0.85rem 1rem;
+    z-index: 1030;
+    transition: all 0.3s ease;
 }
 
-ul {
-    list-style: none;
-    padding: 0;
+.brand-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #0066ff, #00d4ff);
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 128, 255, 0.5);
+    font-size: 1.2rem;
 }
 
-ul li {
-    margin-bottom: 15px;
+.brand-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #ffffff;
 }
 
-ul li a {
+.brand-accent {
+    color: #00d4ff;
+    text-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
+}
+
+.fintra-navbar .nav-link {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.5rem 0.9rem !important;
+    border-radius: var(--radius-sm);
+    transition: all 0.25s ease;
+}
+
+.fintra-navbar .nav-link:hover,
+.fintra-navbar .nav-link.active {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.dropdown-glass {
+    background: rgba(11, 18, 38, 0.95) !important;
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border-glass);
+    border-radius: var(--radius-md);
+    padding: 0.5rem;
+}
+
+.dropdown-glass .dropdown-item {
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.85rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.dropdown-glass .dropdown-item:hover {
+    color: #ffffff;
+    background: rgba(0, 128, 255, 0.2);
+}
+
+/* Primary Glass Buttons */
+.btn-fintra-primary {
+    background: linear-gradient(135deg, #0070f3, #00b4d8);
+    color: white;
+    font-weight: 600;
+    border: none;
+    box-shadow: 0 4px 14px rgba(0, 112, 243, 0.39);
+    transition: all 0.25s ease;
+}
+
+.btn-fintra-primary:hover {
+    background: linear-gradient(135deg, #005ac7, #0096c7);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 112, 243, 0.6);
+}
+
+/* Main Content Layout */
+.main-content {
+    flex: 1 0 auto;
+}
+
+/* ==========================================================================
+   Home Quick Launcher Card (Exact Match to User's Mockup Photo)
+   ========================================================================== */
+.launcher-viewport {
+    min-height: calc(100vh - 160px);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 14px;
-    background-color: #007BFF;
-    color: white !important;
+    padding: 1.5rem 0;
+}
+
+.launcher-card {
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 212, 255, 0.15);
+    padding: 2.25rem 2rem;
+    max-width: 440px;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.launcher-card:hover {
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7), 0 0 50px rgba(0, 212, 255, 0.25);
+}
+
+.launcher-header {
     text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.launcher-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+}
+
+.launcher-title .highlight {
+    color: #0070f3;
+}
+
+.launcher-divider {
+    height: 2px;
+    background: #e2e8f0;
+    margin: 0 auto 1.5rem auto;
+    width: 80%;
+    border-radius: 2px;
+}
+
+.launcher-btn-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+/* The Signature Blue Action Buttons from the photo */
+.launcher-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.25rem;
+    background: linear-gradient(135deg, #0077ff 0%, #00a2ff 100%);
+    color: #ffffff !important;
     text-decoration: none;
     border-radius: 12px;
     font-weight: 600;
-    font-size: 16px;
-    transition: background-color 0.3s ease-in-out, transform 0.2s;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-ul li a:hover {
-    background-color: #0056b3;
-    transform: scale(1.03);
-    color: #fff !important;
-}
-
-ul li {
-    margin-bottom: 20px;
-}
-
-form label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #ddd;
-}
-
-form input[type="text"],
-form input[type="number"],
-form input[type="date"],
-form textarea,
-form select {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 20px;
-    border: 1px solid #444;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    border-radius: 10px;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease-in-out, background-color 0.3s;
-}
-
-form input:focus,
-form textarea:focus,
-form select:focus {
-    border-color: #00d4ff;
-    outline: none;
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-button {
-    display: block;
-    width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, #007BFF, #00BFFF);
-    color: white;
-    font-weight: bold;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(0, 119, 255, 0.3);
     border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background 0.3s ease-in-out, transform 0.2s;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
 }
 
-button:hover {
-    background: linear-gradient(135deg, #0056b3, #0099cc);
-    transform: scale(1.03);
+.launcher-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.launcher-btn:hover::after {
+    left: 120%;
+}
+
+.launcher-btn:hover {
+    background: linear-gradient(135deg, #005ecc 0%, #0088ee 100%);
+    transform: translateY(-2px) scale(1.015);
+    box-shadow: 0 8px 20px rgba(0, 119, 255, 0.45);
+    color: #ffffff !important;
+}
+
+.launcher-btn:active {
+    transform: translateY(0) scale(0.99);
+}
+
+.launcher-btn .btn-icon {
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* ==========================================================================
+   FinTra Glassmorphic Dashboard & Content Cards
+   ========================================================================== */
+.fintra-card {
+    background: var(--card-bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--card-border-glass);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--card-shadow);
+    padding: 1.75rem 2rem;
+    color: var(--text-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.fintra-card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+/* KPI Metric Cards */
+.metric-card {
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    transition: all 0.25s ease;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 212, 255, 0.3);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #0080ff, #00d4ff);
+}
+
+.metric-card.success::before {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.metric-card.danger::before {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.metric-card.warning::before {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.metric-title {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.4rem;
+}
+
+.metric-value {
+    font-size: 1.65rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+    margin-bottom: 0.25rem;
+}
+
+.metric-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* ==========================================================================
+   Financial Filing Wizard Progress Stepper
+   ========================================================================== */
+.wizard-stepper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.wizard-stepper::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 1;
+}
+
+.wizard-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    text-decoration: none;
+    color: var(--text-secondary);
+    transition: all 0.25s ease;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    outline: none;
+}
+
+.wizard-step:hover .wizard-circle {
+    border-color: #00d4ff;
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+
+.wizard-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #0f172a;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.wizard-step.active .wizard-circle {
+    background: linear-gradient(135deg, #0070f3, #00d4ff);
+    border-color: #00d4ff;
+    color: white;
+    box-shadow: 0 0 18px rgba(0, 212, 255, 0.6);
+    transform: scale(1.1);
+}
+
+.wizard-step.completed .wizard-circle {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+
+.wizard-label {
+    font-size: 0.825rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.wizard-step.active .wizard-label {
+    color: #00d4ff;
+    font-weight: 700;
+}
+
+/* Form Styling & Helper Callouts */
+.form-label {
+    color: #e2e8f0;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.fintra-form-control {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.25s ease;
+}
+
+.fintra-form-control:focus {
+    background: rgba(20, 30, 55, 0.85);
+    border-color: #00d4ff;
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.2);
+    color: #ffffff;
+    outline: none;
+}
+
+.fintra-form-control::placeholder {
+    color: #64748b;
+}
+
+.field-tip {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+    display: block;
+}
+
+/* Interactive Calculator Live Cards */
+.live-calc-box {
+    background: rgba(0, 128, 255, 0.08);
+    border: 1px solid rgba(0, 128, 255, 0.25);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Tables in Glassmorphic Theme */
+.fintra-table {
+    width: 100%;
+    color: var(--text-primary);
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.fintra-table th {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    font-size: 0.825rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--card-border-glass);
+}
+
+.fintra-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.925rem;
+    vertical-align: middle;
+}
+
+.fintra-table tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Chatbot Styles */
+.chat-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.chat-box {
+    height: 480px;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: rgba(8, 14, 28, 0.75);
+    border: 1px solid var(--card-border-glass);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.chat-bubble {
+    max-width: 80%;
+    padding: 0.95rem 1.25rem;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    position: relative;
+    word-break: break-word;
+}
+
+.chat-bubble.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #0066ff, #0099ff);
+    color: #ffffff;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 4px 15px rgba(0, 102, 255, 0.35);
+}
+
+.chat-bubble.assistant {
+    align-self: flex-start;
+    background: rgba(25, 35, 60, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f1f5f9;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.prompt-chip {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-secondary);
+    padding: 0.4rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.825rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.prompt-chip:hover {
+    background: rgba(0, 128, 255, 0.25);
+    border-color: #0080ff;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+/* Footer Styling */
+.fintra-footer {
+    border-top: 1px solid var(--card-border-glass);
+    background: rgba(6, 11, 24, 0.85);
+    backdrop-filter: blur(12px);
+    margin-top: auto;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease forwards;
 }

@@ -1,201 +1,183 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>FinTra Chatbot</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20230630/pngtree-d-rendering-of-a-glowing-digital-business-interface-showcasing-finance-innovation-image_3694007.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: #fff;
-            margin: 0;
-            padding: 0;
-            backdrop-filter: blur(4px);
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 700px;
-            margin: 60px auto;
-            background-color: rgba(0, 0, 0, 0.75);
-            padding: 30px 40px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-            border-radius: 16px;
-            color: #fff;
-        }
-        
-        h1, h2 {
-            text-align: center;
-            color: #f8f9fa;
-            font-size: 32px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #666;
-            padding-bottom: 10px;
-            text-shadow: 1px 1px 2px #000;
-        }
-        
-        #messages {
-            background-color: rgba(255, 255, 255, 0.05);
-            border: 1px solid #444;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            height: 400px;
-            overflow-y: auto;
-        }
-        
-        .message {
-            margin-bottom: 15px;
-            padding: 12px;
-            border-radius: 8px;
-            word-wrap: break-word;
-        }
-        
-        .user-msg {
-            text-align: right;
-            background-color: rgba(0, 123, 255, 0.3);
-            border-left: 3px solid #007BFF;
-        }
-        
-        .bot-msg {
-            text-align: left;
-            background-color: rgba(0, 180, 100, 0.2);
-            border-left: 3px solid #28a745;
-        }
-        
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        #question {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #444;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border-radius: 10px;
-            transition: border-color 0.3s;
-        }
-        
-        #question::placeholder {
-            color: #aaa;
-        }
-        
-        #question:focus {
-            outline: none;
-            border-color: #00d4ff;
-            background-color: rgba(255, 255, 255, 0.15);
-        }
-        
-        button {
-            padding: 12px 25px;
-            background: linear-gradient(135deg, #007BFF, #00BFFF);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        button:hover {
-            background: linear-gradient(135deg, #0056b3, #0099cc);
-            transform: scale(1.03);
-        }
-        
-        button:active {
-            transform: scale(0.98);
-        }
-        
-        .loading::after {
-            content: '';
-            animation: dots 1.5s steps(4, end) infinite;
-        }
-        
-        @keyframes dots {
-            0%, 20% { content: ''; }
-            40% { content: '.'; }
-            60% { content: '..'; }
-            80%, 100% { content: '...'; }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>💬 FinTra Bot</h2>
-        <div id="messages"></div>
-        <div class="input-group">
-            <input type="text" id="question" placeholder="Ask a financial question..." />
-            <button onclick="askQuestion()">Send</button>
+{% extends "base.html" %}
+
+{% block title %}FinTra - AI Financial Advisor & Expert Agent{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="chat-container">
+
+        <!-- Chat Header Card -->
+        <div class="fintra-card mb-3 fade-in">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="brand-icon bg-primary bg-gradient position-relative">
+                        <i class="bi bi-robot text-white fs-4"></i>
+                        <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-dark rounded-circle"></span>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0 text-white">FinTra AI Financial Advisor</h4>
+                        <p class="fs-xs text-secondary mb-0">
+                            Powered by Dual AI (Gemini 1.5 + Autonomous FinTra MSME Expert Rules Engine)
+                        </p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success-subtle text-success border border-success px-3 py-1 fs-xs">
+                        <i class="bi bi-circle-fill me-1 fs-xs"></i> Advisor Online
+                    </span>
+                    <a href="/result-summary" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                        <i class="bi bi-pie-chart me-1"></i> View Report
+                    </a>
+                </div>
+            </div>
         </div>
+
+        <!-- Chat Messages Container -->
+        <div class="chat-box mb-3 fade-in" id="chatBox">
+            <!-- Welcome Bot Message -->
+            <div class="chat-bubble assistant">
+                <div class="d-flex align-items-center gap-2 mb-2 text-info fs-xs fw-bold text-uppercase">
+                    <i class="bi bi-robot"></i> FinTra Advisory Agent
+                </div>
+                <p class="mb-2">
+                    Hello! I am your <strong>FinTra Financial Expert</strong>. I can assist you with business valuation, working capital optimization, balance sheet auditing, P&L margin diagnostics, and MSME tax planning.
+                </p>
+                <p class="mb-0 fs-sm text-secondary">
+                    You can ask general accounting questions or click any quick topic below:
+                </p>
+            </div>
+        </div>
+
+        <!-- Quick Prompt Chips -->
+        <div class="d-flex flex-wrap gap-2 mb-3 no-print">
+            <span class="prompt-chip" onclick="askPreset('Analyze my business financial health')">
+                <i class="bi bi-bar-chart-line me-1"></i> Analyze my business health
+            </span>
+            <span class="prompt-chip" onclick="askPreset('How can I improve my net profit margin?')">
+                <i class="bi bi-arrow-up-right me-1"></i> Improve profit margin
+            </span>
+            <span class="prompt-chip" onclick="askPreset('Explain the working capital formula and benchmarks')">
+                <i class="bi bi-wallet2 me-1"></i> Working capital guide
+            </span>
+            <span class="prompt-chip" onclick="askPreset('What is a healthy Current Ratio for MSMEs?')">
+                <i class="bi bi-speedometer2 me-1"></i> Current Ratio benchmark
+            </span>
+            <span class="prompt-chip" onclick="askPreset('Explain the Golden Accounting Equation: Assets = Liabilities + Equity')">
+                <i class="bi bi-journal-text me-1"></i> Balance sheet equation
+            </span>
+        </div>
+
+        <!-- Input Form -->
+        <div class="fintra-card p-3 fade-in">
+            <form id="chatForm" class="d-flex gap-2">
+                <input 
+                    type="text" 
+                    id="userInput" 
+                    class="form-control fintra-form-control fs-6" 
+                    placeholder="Ask about profit margins, balance sheets, loans, or tax deductions..." 
+                    autocomplete="off" 
+                    required 
+                    autofocus
+                >
+                <button type="submit" class="btn btn-fintra-primary rounded-pill px-4 d-flex align-items-center gap-2" id="sendBtn">
+                    <span>Ask</span>
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </form>
+        </div>
+
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        document.getElementById("question").addEventListener("keypress", (e) => {
-            if (e.key === "Enter") askQuestion();
-        });
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const chatBox = document.getElementById("chatBox");
+    const chatForm = document.getElementById("chatForm");
+    const userInput = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
 
-        async function askQuestion() {
-            const question = document.getElementById("question").value.trim();
-            if (!question) return;
+    function appendMessage(sender, text) {
+        const bubble = document.createElement("div");
+        bubble.className = `chat-bubble ${sender}`;
 
-            const msgBox = document.getElementById("messages");
-            
-            // Display user message
-            const userDiv = document.createElement("div");
-            userDiv.className = "message user-msg";
-            userDiv.textContent = question;
-            msgBox.appendChild(userDiv);
-            
-            // Clear input
-            document.getElementById("question").value = "";
-            msgBox.scrollTop = msgBox.scrollHeight;
-
-            // Show loading
-            const loadDiv = document.createElement("div");
-            loadDiv.className = "message bot-msg loading";
-            loadDiv.id = "loading-msg";
-            loadDiv.textContent = "Thinking";
-            msgBox.appendChild(loadDiv);
-            msgBox.scrollTop = msgBox.scrollHeight;
-
-            try {
-                const res = await fetch("/ask-financial", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ question })
-                });
-
-                const data = await res.json();
-                
-                // Remove loading
-                const loading = document.getElementById("loading-msg");
-                if (loading) loading.remove();
-                
-                // Display answer
-                const answerDiv = document.createElement("div");
-                answerDiv.className = "message bot-msg";
-                answerDiv.textContent = data.answer || "I couldn't process that. Please try again.";
-                msgBox.appendChild(answerDiv);
-                
-            } catch (err) {
-                const loading = document.getElementById("loading-msg");
-                if (loading) loading.remove();
-                
-                const errorDiv = document.createElement("div");
-                errorDiv.className = "message bot-msg";
-                errorDiv.textContent = `Error: ${err.message}`;
-                msgBox.appendChild(errorDiv);
-            }
-            
-            msgBox.scrollTop = msgBox.scrollHeight;
+        if (sender === "user") {
+            bubble.innerHTML = `<div class="d-flex align-items-center gap-2 mb-1 text-light fs-xs fw-bold justify-content-end"><i class="bi bi-person-fill"></i> You</div><div>${escapeHtml(text)}</div>`;
+        } else {
+            // Render markdown-like bold and bullet points
+            const formatted = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n• /g, '<br>• ')
+                .replace(/\n- /g, '<br>• ');
+            bubble.innerHTML = `<div class="d-flex align-items-center gap-2 mb-1 text-info fs-xs fw-bold text-uppercase"><i class="bi bi-robot"></i> FinTra Expert</div><div>${formatted}</div>`;
         }
-    </script>
-</body>
-</html>
+
+        chatBox.appendChild(bubble);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    async function handleSend(question) {
+        if (!question) return;
+
+        appendMessage("user", question);
+        userInput.value = "";
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+        // Add temporary typing indicator
+        const typingBubble = document.createElement("div");
+        typingBubble.className = "chat-bubble assistant";
+        typingBubble.id = "typingIndicator";
+        typingBubble.innerHTML = '<span class="text-secondary"><i class="bi bi-three-dots"></i> Consulting FinTra Financial Engine...</span>';
+        chatBox.appendChild(typingBubble);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            const res = await fetch("/ask-financial", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: question })
+            });
+
+            const data = await res.json();
+            const indicator = document.getElementById("typingIndicator");
+            if (indicator) indicator.remove();
+
+            if (data.answer) {
+                appendMessage("assistant", data.answer);
+            } else {
+                appendMessage("assistant", "I could not generate an answer. Please rephrase your question.");
+            }
+        } catch (err) {
+            console.error(err);
+            const indicator = document.getElementById("typingIndicator");
+            if (indicator) indicator.remove();
+            appendMessage("assistant", "Unable to connect to the financial advisory service. Please check your connection.");
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<span>Ask</span> <i class="bi bi-send-fill"></i>';
+        }
+    }
+
+    chatForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const text = userInput.value.trim();
+        handleSend(text);
+    });
+
+    window.askPreset = function (promptText) {
+        userInput.value = promptText;
+        handleSend(promptText);
+    };
+});
+</script>
+{% endblock %}

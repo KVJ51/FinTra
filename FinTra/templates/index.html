@@ -1,59 +1,110 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>FinTra Dashboard</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .dashboard-card {
-            border-radius: 1rem;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            background-color: white;
-            transition: transform 0.2s ease-in-out;
-        }
-        .dashboard-card:hover {
-            transform: scale(1.02);
-        }
-        .dashboard-title {
-            font-weight: 700;
-            color: #212529;
-        }
-        .dashboard-links a {
-            text-decoration: none;
-            color: #0d6efd;
-            font-weight: 500;
-        }
-        .dashboard-links a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="dashboard-card text-center">
-                    <h1 class="dashboard-title mb-4">Welcome to <span class="text-primary">FinTra</span></h1>
-                    <p class="mb-4">Your personal finance & auditing partner for small businesses.</p>
-                    <div class="dashboard-links">
-                        <ul class="list-group">
-                            <li class="list-group-item"><a href="/add-income">➕ Add Income</a></li>
-                            <li class="list-group-item"><a href="/add-expense">➖ Add Expense</a></li>
-                            <li class="list-group-item"><a href="/project-report">📝 Create Project Report</a></li>
-                            <li class="list-group-item"><a href="/balance-sheet">📑 Projected Balance Sheet</a></li>
-                            <li class="list-group-item"><a href="/profit-loss">💼 Profit and Loss Account</a></li>
-                            <li class="list-group-item"><a href="/result-summary">📊 Final Summary</a></li>
-                            <li class="list_group-item"><a href="/chatbot">💬 Chatbot (Financial Expert)</a></li>
-                        </ul>
+{% extends "base.html" %}
+
+{% block title %}FinTra - Welcome to FinTra{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3">
+    <div class="launcher-viewport">
+        <div class="d-flex flex-column align-items-center w-100">
+
+            <!-- Center Launcher Card (Exact Match to User's Mockup Photo) -->
+            <div class="launcher-card fade-in">
+                <div class="launcher-header">
+                    <h1 class="launcher-title">Welcome to <span class="highlight">FinTra</span></h1>
+                    <div class="launcher-divider"></div>
+                </div>
+
+                <div class="launcher-btn-list">
+                    <a href="/add-income" class="launcher-btn">
+                        <span class="btn-icon"><i class="bi bi-plus-lg text-white"></i></span>
+                        <span>Add Income</span>
+                    </a>
+                    
+                    <a href="/add-expense" class="launcher-btn">
+                        <span class="btn-icon"><i class="bi bi-dash-lg text-white"></i></span>
+                        <span>Add Expense</span>
+                    </a>
+                    
+                    <a href="/project-report" class="launcher-btn">
+                        <span class="btn-icon"><i class="bi bi-file-earmark-text"></i></span>
+                        <span>Create Project Report</span>
+                    </a>
+                    
+                    <a href="/balance-sheet" class="launcher-btn">
+                        <span class="btn-icon"><i class="bi bi-file-earmark-spreadsheet"></i></span>
+                        <span>Projected Balance Sheet</span>
+                    </a>
+                    
+                    <a href="/profit-loss" class="launcher-btn">
+                        <span class="btn-icon"><i class="bi bi-briefcase"></i></span>
+                        <span>Profit and Loss Account</span>
+                    </a>
+                    
+                    <a href="/result-summary" class="launcher-btn">
+                        <span class="btn-icon"><i class="bi bi-bar-chart-line"></i></span>
+                        <span>Final Summary</span>
+                    </a>
+                    
+                    <a href="/chatbot" class="launcher-btn">
+                        <span class="btn-icon"><i class="bi bi-chat-dots"></i></span>
+                        <span>Chatbot (Financial Expert)</span>
+                    </a>
+                </div>
+
+                <!-- Fast Demo & Quick Reset Helpers -->
+                <div class="text-center mt-3 pt-2 border-top border-light-subtle">
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="/load-demo-data" class="badge bg-primary-subtle text-primary border border-primary text-decoration-none px-2 py-1 fs-xs">
+                            <i class="bi bi-magic me-1"></i> Load Demo Business Data
+                        </a>
+                        <a href="/dashboard" class="badge bg-secondary-subtle text-secondary border border-secondary text-decoration-none px-2 py-1 fs-xs">
+                            <i class="bi bi-grid me-1"></i> Full Command Center
+                        </a>
                     </div>
                 </div>
             </div>
+
+            <!-- Real-time Live Financial Snapshot Bar -->
+            <div class="row g-3 justify-content-center w-100 max-w-900 mt-4 fade-in" style="max-width: 900px;">
+                <div class="col-6 col-md-3">
+                    <div class="metric-card success">
+                        <div class="metric-title"><i class="bi bi-arrow-down-left-circle me-1"></i> Recorded Income</div>
+                        <div class="metric-value">₹{{ "{:,.2f}".format(total_income) }}</div>
+                        <span class="metric-badge bg-success-subtle text-success">
+                            <i class="bi bi-check2"></i> Live Ledger
+                        </span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-card danger">
+                        <div class="metric-title"><i class="bi bi-arrow-up-right-circle me-1"></i> Recorded Expense</div>
+                        <div class="metric-value">₹{{ "{:,.2f}".format(total_expense) }}</div>
+                        <span class="metric-badge bg-danger-subtle text-danger">
+                            <i class="bi bi-graph-down"></i> Outflows
+                        </span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-card {% if net_balance >= 0 %}success{% else %}danger{% endif %}">
+                        <div class="metric-title"><i class="bi bi-cash-stack me-1"></i> Net Cashflow</div>
+                        <div class="metric-value">₹{{ "{:,.2f}".format(net_balance) }}</div>
+                        <span class="metric-badge {% if net_balance >= 0 %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %}">
+                            {% if net_balance >= 0 %}Surplus{% else %}Deficit{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-card warning">
+                        <div class="metric-title"><i class="bi bi-file-earmark-check me-1"></i> Filed Reports</div>
+                        <div class="metric-value">{{ report_count }}</div>
+                        <span class="metric-badge bg-warning-subtle text-warning">
+                            Audited Reports
+                        </span>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

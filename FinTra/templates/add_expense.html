@@ -1,23 +1,130 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add Expense</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>➖ Add Expense</h1>
-        <form method="POST">
-            <label for="category">Category:</label>
-            <input type="text" id="category" name="category" required>
+{% extends "base.html" %}
 
-            <label for="amount">Amount (₹):</label>
-            <input type="number" id="amount" name="amount" step="0.01" required>
+{% block title %}FinTra - Record Expense{% endblock %}
 
-            <button type="submit" class="btn">Add Expense</button>
-        </form>
-        <a href="/" class="btn">← Back to Dashboard</a>
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+
+            <!-- Card Form -->
+            <div class="fintra-card fade-in mb-4">
+                <div class="d-flex align-items-center justify-content-between border-bottom border-secondary border-opacity-25 pb-3 mb-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="brand-icon bg-danger bg-gradient"><i class="bi bi-dash-lg"></i></span>
+                        <div>
+                            <h4 class="fw-bold mb-0 text-white">Record Expense</h4>
+                            <p class="fs-xs text-secondary mb-0">Track vendor payouts, operational overheads, and inventory costs.</p>
+                        </div>
+                    </div>
+                    <a href="/dashboard" class="btn btn-sm btn-outline-secondary rounded-pill">
+                        <i class="bi bi-arrow-left me-1"></i> Dashboard
+                    </a>
+                </div>
+
+                <form method="POST" action="/add-expense">
+                    <!-- Payee / Vendor -->
+                    <div class="mb-3">
+                        <label for="source_payee" class="form-label">
+                            <span>Vendor / Payee Name</span>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="source_payee" name="source_payee" class="form-control fintra-form-control" placeholder="e.g. AWS Cloud / Landlord / Office Depot" required autofocus>
+                        <span class="field-tip">Recipient of this expense payout.</span>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="mb-3">
+                        <label for="category_select" class="form-label">Expense Category</label>
+                        <select id="category_select" name="category_select" class="form-select fintra-form-control">
+                            <option value="Salaries & Payroll">Salaries & Payroll</option>
+                            <option value="Raw Materials / COGS">Raw Materials & Inventory (COGS)</option>
+                            <option value="Rent & Workspace">Office Rent & Facilities</option>
+                            <option value="Software & Cloud">Cloud Servers & SaaS Tools</option>
+                            <option value="Marketing & Ads">Advertising & Marketing</option>
+                            <option value="Utilities & Power">Utilities, Electricity & Internet</option>
+                            <option value="Maintenance & Repair">Equipment Maintenance & Repairs</option>
+                            <option value="Loan Interest">Bank Loan Interest & Fees</option>
+                            <option value="Tax & Legal">Taxes, GST, Legal & Auditing</option>
+                            <option value="General Overheads">General Miscellaneous Overheads</option>
+                        </select>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">
+                            <span>Amount (₹)</span>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark text-white border-secondary">₹</span>
+                            <input type="number" id="amount" name="amount" step="0.01" class="form-control fintra-form-control fs-5 fw-bold text-danger" placeholder="0.00" required>
+                        </div>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Expense Date</label>
+                        <input type="date" id="date" name="date" class="form-control fintra-form-control">
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        <label for="notes" class="form-label">Description / Receipt Note</label>
+                        <textarea id="notes" name="notes" rows="2" class="form-control fintra-form-control" placeholder="Bill reference, payment method, or item description..."></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg rounded-pill fw-semibold shadow">
+                            <i class="bi bi-check-circle-fill me-2"></i> Save Expense to Ledger
+                        </button>
+                        <a href="/" class="btn btn-outline-secondary rounded-pill">
+                            Cancel & Return to Home
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Recent Expenses Mini-Ledger -->
+            {% if recent_expenses and recent_expenses|length > 0 %}
+            <div class="fintra-card fade-in">
+                <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-clock-history me-1"></i> Recent Expenses</h6>
+                <div class="table-responsive">
+                    <table class="fintra-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Payee</th>
+                                <th>Category</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exp in recent_expenses %}
+                            <tr>
+                                <td class="fs-xs text-muted">{{ exp['date'] }}</td>
+                                <td class="fw-medium text-white">{{ exp['source_payee'] }}</td>
+                                <td class="fs-xs text-secondary">{{ exp['category'] }}</td>
+                                <td class="text-end fw-bold text-danger">-₹{{ "{:,.2f}".format(exp['amount']) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Default today's date if empty
+    const dateInput = document.getElementById('date');
+    if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+    }
+</script>
+{% endblock %}

@@ -1,34 +1,675 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Project Report</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h2>Project Report - Business Details</h2>
-        <form method="POST" action="/project-report">
-            <label>Business Name:</label>
-            <input type="text" name="business_name" required>
+{% extends "base.html" %}
 
-            <label>Incorporation Date:</label>
-            <input type="date" name="incorporation_date" required>
+{% block title %}FinTra - Financial Filing Wizard & Analysis{% endblock %}
 
-            <label>Date of Business Start:</label>
-            <input type="date" name="business_start_date" required>
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
 
-            <label>Business Place:</label>
-            <input type="text" name="place" required>
+            <!-- Stepper Progress Header -->
+            <div class="wizard-stepper">
+                <button type="button" class="wizard-step active" id="stepBtn1" onclick="goToStep(1)">
+                    <div class="wizard-circle" id="circle1">1</div>
+                    <div class="wizard-label">Business Details</div>
+                </button>
+                <button type="button" class="wizard-step" id="stepBtn2" onclick="goToStep(2)">
+                    <div class="wizard-circle" id="circle2">2</div>
+                    <div class="wizard-label">Balance Sheet</div>
+                </button>
+                <button type="button" class="wizard-step" id="stepBtn3" onclick="goToStep(3)">
+                    <div class="wizard-circle" id="circle3">3</div>
+                    <div class="wizard-label">Profit & Loss</div>
+                </button>
+                <div class="wizard-step" id="stepBtn4">
+                    <div class="wizard-circle" id="circle4"><i class="bi bi-bar-chart-line"></i></div>
+                    <div class="wizard-label">Audit Analysis</div>
+                </div>
+            </div>
 
-            <label>Team Leader:</label>
-            <input type="text" name="team_leader" required>
+            <!-- Main Wizard Card -->
+            <div class="fintra-card fade-in">
+                <!-- Header with Quick Action Bar -->
+                <div class="fintra-card-header flex-wrap gap-2">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary-subtle text-primary border border-primary px-2 py-1 fs-xs" id="stepBadge">
+                                Step 1 of 3
+                            </span>
+                            <span class="text-secondary fs-xs" id="stepSubtitle">In-Step Financial Filing Process</span>
+                        </div>
+                        <h4 class="fw-bold mb-0 text-white" id="stepTitle">
+                            <i class="bi bi-building-check text-primary me-2"></i>Business Profile & Corporate Setup
+                        </h4>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <a href="/load-demo-data" class="btn btn-sm btn-outline-info rounded-pill px-3">
+                            <i class="bi bi-magic me-1"></i> Pre-fill Demo Data
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3" onclick="submitDirectAnalysis()">
+                            <i class="bi bi-lightning-charge me-1"></i> Direct Analysis
+                        </button>
+                    </div>
+                </div>
 
-            <label>Admin:</label>
-            <input type="text" name="admin" required>
+                <form method="POST" action="/project-report" id="wizardForm">
 
-            <button type="submit">Next: Balance Sheet →</button>
-        </form>
+                    <!-- ========================================================
+                         STEP 1: BUSINESS REGISTRATION & GOVERNANCE
+                         ======================================================== -->
+                    <div class="wizard-pane active" id="stepPane1">
+                        <!-- Direct Analysis Quick Skip Callout -->
+                        <div class="p-3 mb-4 rounded-4 bg-primary bg-opacity-10 border border-primary border-opacity-25 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
+                            <div>
+                                <div class="fw-bold text-white fs-6">
+                                    <i class="bi bi-info-circle-fill text-info me-1"></i> Want Direct Financial Analysis?
+                                </div>
+                                <div class="text-secondary fs-sm">
+                                    Company profile is optional for ratio calculations. You can skip directly to financial figures.
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-2 text-nowrap" onclick="goToStep(2)">
+                                Skip to Balance Sheet <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Business Name -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">
+                                    <span>Registered Business Name</span>
+                                    <span class="text-secondary fs-xs">(Default: My Business Enterprise)</span>
+                                </label>
+                                <input type="text" name="business_name" id="business_name" class="form-control fintra-form-control" placeholder="e.g. Apex Dynamics Ltd." value="{{ project_data.get('business_name', '') }}">
+                                <span class="field-tip">Official legal or trade entity name.</span>
+                            </div>
+
+                            <!-- Operating Location -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">
+                                    <span>Operating Location / City</span>
+                                </label>
+                                <input type="text" name="place" id="place" class="form-control fintra-form-control" placeholder="e.g. Bangalore, Karnataka" value="{{ project_data.get('place', '') }}">
+                                <span class="field-tip">Headquarters or principal manufacturing base.</span>
+                            </div>
+
+                            <!-- Incorporation Date -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">
+                                    <span>Date of Incorporation</span>
+                                </label>
+                                <input type="date" name="incorporation_date" id="incorporation_date" class="form-control fintra-form-control" value="{{ project_data.get('incorporation_date', '') }}">
+                                <span class="field-tip">Company registration / GST commencement date.</span>
+                            </div>
+
+                            <!-- Commercial Start Date -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">
+                                    <span>Commercial Launch Date</span>
+                                </label>
+                                <input type="date" name="business_start_date" id="business_start_date" class="form-control fintra-form-control" value="{{ project_data.get('business_start_date', '') }}">
+                                <span class="field-tip">When commercial sales and operations initiated.</span>
+                            </div>
+                        </div>
+
+                        <!-- Leadership Section -->
+                        <h5 class="fw-bold text-white border-bottom border-secondary border-opacity-25 pb-2 mt-4 mb-3">
+                            <i class="bi bi-people-fill text-info me-2"></i>Executive Leadership & Functional Heads
+                            <span class="fs-xs fw-normal text-secondary ms-2">(Optional for analytical ratios)</span>
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Managing Director / CEO</label>
+                                <input type="text" name="team_leader" class="form-control fintra-form-control" placeholder="Name & Title" value="{{ project_data.get('team_leader', '') }}">
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Administration & Governance</label>
+                                <input type="text" name="admin" class="form-control fintra-form-control" placeholder="Name & Title" value="{{ project_data.get('admin', '') }}">
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Production / Technical Head</label>
+                                <input type="text" name="production" class="form-control fintra-form-control" placeholder="Name & Title" value="{{ project_data.get('production', '') }}">
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Supply Chain & Procurement</label>
+                                <input type="text" name="supply_chain" class="form-control fintra-form-control" placeholder="Name & Title" value="{{ project_data.get('supply_chain', '') }}">
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Marketing & Business Growth</label>
+                                <input type="text" name="marketing" class="form-control fintra-form-control" placeholder="Name & Title" value="{{ project_data.get('marketing', '') }}">
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Plant & IT Infrastructure</label>
+                                <input type="text" name="maintenance" class="form-control fintra-form-control" placeholder="Name & Title" value="{{ project_data.get('maintenance', '') }}">
+                            </div>
+                        </div>
+
+                        <!-- Step 1 Footer -->
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+                            <a href="/" class="btn btn-outline-secondary rounded-pill px-4">
+                                <i class="bi bi-arrow-left me-1"></i> Back to Home
+                            </a>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-fintra-primary rounded-pill px-4 py-2 fs-6 fw-semibold" onclick="goToStep(2)">
+                                    Next: Balance Sheet <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========================================================
+                         STEP 2: PROJECTED BALANCE SHEET
+                         ======================================================== -->
+                    <div class="wizard-pane d-none" id="stepPane2">
+                        <div class="row g-4">
+                            
+                            <!-- ASSETS COLUMN -->
+                            <div class="col-12 col-lg-6">
+                                <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-25 h-100">
+                                    <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
+                                        <i class="bi bi-box-seam-fill me-2"></i>Assets (What You Own)
+                                    </h5>
+
+                                    <!-- Fixed Assets -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <span>Fixed Assets (Plant & Equipment)</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark text-white border-secondary">₹</span>
+                                            <input type="number" step="0.01" name="fixed_assets" id="fixed_assets" class="form-control fintra-form-control calc-trigger" placeholder="0.00" value="{{ balance_data.get('fixed_assets', '') }}">
+                                        </div>
+                                        <span class="field-tip">Machinery, office computers, vehicles, and real estate.</span>
+                                    </div>
+
+                                    <!-- Cash -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <span>Cash in Bank & Hand</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark text-white border-secondary">₹</span>
+                                            <input type="number" step="0.01" name="cash" id="cash" class="form-control fintra-form-control calc-trigger" placeholder="0.00" value="{{ balance_data.get('cash', '') }}">
+                                        </div>
+                                        <span class="field-tip">Liquid bank deposits and operating petty cash.</span>
+                                    </div>
+
+                                    <!-- Receivables -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <span>Accounts Receivable</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark text-white border-secondary">₹</span>
+                                            <input type="number" step="0.01" name="receivables" id="receivables" class="form-control fintra-form-control calc-trigger" placeholder="0.00" value="{{ balance_data.get('receivables', '') }}">
+                                        </div>
+                                        <span class="field-tip">Money owed to you by customers for products/services delivered.</span>
+                                    </div>
+
+                                    <!-- Stock -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <span>Stock & Inventory Value</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark text-white border-secondary">₹</span>
+                                            <input type="number" step="0.01" name="stock" id="stock" class="form-control fintra-form-control calc-trigger" placeholder="0.00" value="{{ balance_data.get('stock', '') }}">
+                                        </div>
+                                        <span class="field-tip">Market value of finished merchandise and raw materials.</span>
+                                    </div>
+
+                                    <div class="p-2 mt-3 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25 d-flex justify-content-between align-items-center">
+                                        <span class="fs-sm fw-semibold text-secondary">Total Projected Assets:</span>
+                                        <span class="fw-bold text-success fs-5" id="liveTotalAssets">₹0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- LIABILITIES & CAPITAL COLUMN -->
+                            <div class="col-12 col-lg-6">
+                                <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-25 h-100">
+                                    <h5 class="fw-bold text-warning mb-3 d-flex align-items-center">
+                                        <i class="bi bi-bank2 me-2"></i>Liabilities & Capital (How Funded)
+                                    </h5>
+
+                                    <!-- Promoters Capital -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <span>Promoters Capital / Equity</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark text-white border-secondary">₹</span>
+                                            <input type="number" step="0.01" name="promoters_capital" id="promoters_capital" class="form-control fintra-form-control calc-trigger" placeholder="0.00" value="{{ balance_data.get('promoters_capital', '') }}">
+                                        </div>
+                                        <span class="field-tip">Initial funds invested by founders and equity shareholders.</span>
+                                    </div>
+
+                                    <!-- Term Loans -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <span>Term Loans & Bank Borrowings</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark text-white border-secondary">₹</span>
+                                            <input type="number" step="0.01" name="term_loan" id="term_loan" class="form-control fintra-form-control calc-trigger" placeholder="0.00" value="{{ balance_data.get('term_loan', '') }}">
+                                        </div>
+                                        <span class="field-tip">Long-term debts, equipment finance, and bank loans.</span>
+                                    </div>
+
+                                    <!-- Current Liabilities -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <span>Current Liabilities</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark text-white border-secondary">₹</span>
+                                            <input type="number" step="0.01" name="current_liabilities" id="current_liabilities" class="form-control fintra-form-control calc-trigger" placeholder="0.00" value="{{ balance_data.get('current_liabilities', '') }}">
+                                        </div>
+                                        <span class="field-tip">Accounts payable, unpaid vendor invoices due within 12 months.</span>
+                                    </div>
+
+                                    <div class="p-2 mt-4 rounded-3 bg-warning bg-opacity-10 border border-warning border-opacity-25 d-flex justify-content-between align-items-center">
+                                        <span class="fs-sm fw-semibold text-secondary">Total Liabilities & Equity:</span>
+                                        <span class="fw-bold text-warning fs-5" id="liveTotalLiabilities">₹0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Live Accounting Balance Check Alert -->
+                        <div class="live-calc-box mt-4 fade-in" id="balanceStatusBox">
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                                <div>
+                                    <div class="fw-bold fs-6 text-white" id="balanceStatusTitle">
+                                        <i class="bi bi-info-circle me-1"></i> Balance Equation: Assets = Liabilities + Equity
+                                    </div>
+                                    <div class="fs-sm text-secondary" id="balanceStatusDesc">
+                                        Enter your assets and liabilities to monitor equation reconciliation in real time.
+                                    </div>
+                                </div>
+                                <span class="badge bg-secondary px-3 py-2 fs-6 rounded-pill" id="balanceBadge">
+                                    Evaluating...
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 Footer -->
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" onclick="goToStep(1)">
+                                <i class="bi bi-arrow-left me-1"></i> Back: Business Details
+                            </button>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-warning rounded-pill px-3" onclick="submitDirectAnalysis()">
+                                    <i class="bi bi-lightning-charge me-1"></i> Direct Analysis
+                                </button>
+                                <button type="button" class="btn btn-fintra-primary rounded-pill px-4 py-2 fs-6 fw-semibold" onclick="goToStep(3)">
+                                    Next: Profit & Loss <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========================================================
+                         STEP 3: PROFIT AND LOSS STATEMENT
+                         ======================================================== -->
+                    <div class="wizard-pane d-none" id="stepPane3">
+                        <div class="row g-4">
+
+                            <!-- REVENUE & DIRECT COSTS -->
+                            <div class="col-12 col-lg-6">
+                                <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-25 h-100">
+                                    <h5 class="fw-bold text-info mb-3 d-flex align-items-center">
+                                        <i class="bi bi-graph-up-arrow me-2"></i>Commercial Revenue & Direct Costs
+                                    </h5>
+
+                                    <!-- Sales -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <span>Total Sales / Revenue</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark text-white border-secondary">₹</span>
+                                            <input type="number" step="0.01" name="sales" id="sales" class="form-control fintra-form-control pl-trigger" placeholder="0.00" value="{{ profit_loss_data.get('sales', '') }}">
+                                        </div>
+                                        <span class="field-tip">Gross billings and sales turnover before any expense deduction.</span>
+                                    </div>
+
+                                    <!-- Production Cost -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <span>Production Cost / COGS</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark text-white border-secondary">₹</span>
+                                            <input type="number" step="0.01" name="production_cost" id="production_cost" class="form-control fintra-form-control pl-trigger" placeholder="0.00" value="{{ profit_loss_data.get('production_cost', '') }}">
+                                        </div>
+                                        <span class="field-tip">Cost of goods sold: direct materials, manufacturing labor, packaging.</span>
+                                    </div>
+
+                                    <!-- Live Gross Profit Preview -->
+                                    <div class="p-3 mt-4 rounded-3 bg-info bg-opacity-10 border border-info border-opacity-25">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fs-sm fw-semibold text-secondary">Auto Gross Profit:</span>
+                                            <span class="fw-bold text-info fs-5" id="liveGrossProfit">₹0.00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fs-xs text-muted">Gross Profit Margin:</span>
+                                            <span class="badge bg-info-subtle text-info" id="liveGrossMargin">0.0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPERATING OVERHEADS & EXPENSES -->
+                            <div class="col-12 col-lg-6">
+                                <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-25 h-100">
+                                    <h5 class="fw-bold text-danger mb-3 d-flex align-items-center">
+                                        <i class="bi bi-receipt me-2"></i>Operating Overheads & Salaries
+                                    </h5>
+
+                                    <!-- Salaries -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <span>Salaries & Team Payroll</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark text-white border-secondary">₹</span>
+                                            <input type="number" step="0.01" name="salary" id="salary" class="form-control fintra-form-control pl-trigger" placeholder="0.00" value="{{ profit_loss_data.get('salary', '') }}">
+                                        </div>
+                                        <span class="field-tip">Employee compensation, contractor fees, and payroll taxes.</span>
+                                    </div>
+
+                                    <!-- Overheads -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <span>General Overheads & Rent</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark text-white border-secondary">₹</span>
+                                            <input type="number" step="0.01" name="overheads" id="overheads" class="form-control fintra-form-control pl-trigger" placeholder="0.00" value="{{ profit_loss_data.get('overheads', '') }}">
+                                        </div>
+                                        <span class="field-tip">Utilities, software, marketing, office rent, and insurance.</span>
+                                    </div>
+
+                                    <!-- Loan Interest -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <span>Interest on Loans & Finance Costs</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark text-white border-secondary">₹</span>
+                                            <input type="number" step="0.01" name="other_expenses" id="other_expenses" class="form-control fintra-form-control pl-trigger" placeholder="0.00" value="{{ profit_loss_data.get('other_expenses', '') }}">
+                                        </div>
+                                        <span class="field-tip">Annual bank interest charges, processing fees, financial costs.</span>
+                                    </div>
+
+                                    <!-- Hidden Gross & Net for backward compatibility -->
+                                    <input type="hidden" name="gross_profit" id="gross_profit_hidden" value="{{ profit_loss_data.get('gross_profit', '') }}">
+                                    <input type="hidden" name="net_profit" id="net_profit_hidden" value="{{ profit_loss_data.get('net_profit', '') }}">
+
+                                    <!-- Live Net Profit Preview -->
+                                    <div class="p-3 mt-3 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fs-sm fw-semibold text-secondary">Auto Net Profit (PAT):</span>
+                                            <span class="fw-bold text-success fs-5" id="liveNetProfit">₹0.00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fs-xs text-muted">Net Profit Margin:</span>
+                                            <span class="badge bg-success-subtle text-success" id="liveNetMargin">0.0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Diagnostic Callout -->
+                        <div class="live-calc-box mt-4 fade-in" id="marginDiagnosticBox">
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                                <div>
+                                    <div class="fw-bold fs-6 text-white" id="marginDiagnosticTitle">
+                                        <i class="bi bi-speedometer me-1"></i> Profitability Health Diagnostic
+                                    </div>
+                                    <div class="fs-sm text-secondary" id="marginDiagnosticDesc">
+                                        Enter your sales and overheads to calculate operational efficiency.
+                                    </div>
+                                </div>
+                                <span class="badge bg-secondary px-3 py-2 fs-6 rounded-pill" id="marginScoreBadge">
+                                    Evaluating
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 Footer -->
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" onclick="goToStep(2)">
+                                <i class="bi bi-arrow-left me-1"></i> Back: Balance Sheet
+                            </button>
+                            <button type="submit" class="btn btn-fintra-primary rounded-pill px-4 py-2 fs-6 fw-semibold shadow-lg">
+                                <i class="bi bi-lightning-charge-fill me-1"></i> Generate Financial Analysis Report
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Current Step State
+    let currentStep = {{ initial_step|default(1)|int }};
+
+    function formatINR(val) {
+        return '₹' + parseFloat(val || 0).toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function getVal(id) {
+        const el = document.getElementById(id);
+        if (!el) return 0;
+        const val = parseFloat(el.value);
+        return isNaN(val) ? 0 : val;
+    }
+
+    // Step Switcher
+    function goToStep(step) {
+        currentStep = step;
+
+        // Hide all panes
+        document.getElementById('stepPane1').classList.add('d-none');
+        document.getElementById('stepPane2').classList.add('d-none');
+        document.getElementById('stepPane3').classList.add('d-none');
+
+        // Show selected pane
+        const activePane = document.getElementById('stepPane' + step);
+        if (activePane) {
+            activePane.classList.remove('d-none');
+            activePane.classList.add('fade-in');
+        }
+
+        // Update Stepper Headers
+        for (let i = 1; i <= 3; i++) {
+            const btn = document.getElementById('stepBtn' + i);
+            const circle = document.getElementById('circle' + i);
+            if (!btn || !circle) continue;
+
+            btn.classList.remove('active', 'completed');
+            if (i < step) {
+                btn.classList.add('completed');
+                circle.innerHTML = '<i class="bi bi-check-lg"></i>';
+            } else if (i === step) {
+                btn.classList.add('active');
+                circle.innerText = i;
+            } else {
+                circle.innerText = i;
+            }
+        }
+
+        // Update Card Title & Badge
+        const badge = document.getElementById('stepBadge');
+        const title = document.getElementById('stepTitle');
+        const subtitle = document.getElementById('stepSubtitle');
+
+        if (step === 1) {
+            badge.innerText = 'Step 1 of 3';
+            title.innerHTML = '<i class="bi bi-building-check text-primary me-2"></i>Business Profile & Corporate Setup';
+            subtitle.innerText = 'Record legal entity details and operational management.';
+        } else if (step === 2) {
+            badge.innerText = 'Step 2 of 3';
+            title.innerHTML = '<i class="bi bi-file-earmark-spreadsheet text-info me-2"></i>Projected Balance Sheet';
+            subtitle.innerText = 'Assets, obligations, and funding sources.';
+        } else if (step === 3) {
+            badge.innerText = 'Step 3 of 3';
+            title.innerHTML = '<i class="bi bi-cash-stack text-success me-2"></i>Profit and Loss Statement';
+            subtitle.innerText = 'Revenue, production costs, and operational expenses.';
+        }
+
+        // Scroll smoothly to top of card
+        window.scrollTo({ top: 100, behavior: 'smooth' });
+    }
+
+    // Direct Analysis Form Submission
+    function submitDirectAnalysis() {
+        const businessName = document.getElementById('business_name');
+        if (businessName && !businessName.value.trim()) {
+            businessName.value = 'My Business Enterprise';
+        }
+        document.getElementById('wizardForm').submit();
+    }
+
+    // Live Balance Sheet Calculations
+    function updateBalanceSheetCalc() {
+        const fixedAssets = getVal('fixed_assets');
+        const cash = getVal('cash');
+        const receivables = getVal('receivables');
+        const stock = getVal('stock');
+        const totalAssets = fixedAssets + cash + receivables + stock;
+
+        const capital = getVal('promoters_capital');
+        const termLoan = getVal('term_loan');
+        const currentLiab = getVal('current_liabilities');
+        const totalLiabilities = capital + termLoan + currentLiab;
+
+        const liveAssetsEl = document.getElementById('liveTotalAssets');
+        const liveLiabEl = document.getElementById('liveTotalLiabilities');
+        if (liveAssetsEl) liveAssetsEl.innerText = formatINR(totalAssets);
+        if (liveLiabEl) liveLiabEl.innerText = formatINR(totalLiabilities);
+
+        const variance = Math.abs(totalAssets - totalLiabilities);
+        const statusBox = document.getElementById('balanceStatusBox');
+        const statusTitle = document.getElementById('balanceStatusTitle');
+        const statusDesc = document.getElementById('balanceStatusDesc');
+        const badge = document.getElementById('balanceBadge');
+
+        if (!statusBox || !badge) return;
+
+        if (totalAssets === 0 && totalLiabilities === 0) {
+            badge.className = 'badge bg-secondary px-3 py-2 fs-6 rounded-pill';
+            badge.innerText = 'Pending Inputs';
+            statusTitle.innerHTML = '<i class="bi bi-info-circle me-1"></i> Balance Equation: Assets = Liabilities + Equity';
+            statusDesc.innerText = 'Enter your assets and liabilities to monitor equation reconciliation in real time.';
+        } else if (variance < 1.0) {
+            badge.className = 'badge bg-success text-white px-3 py-2 fs-6 rounded-pill shadow-sm';
+            badge.innerText = 'Perfect Match (₹0.00)';
+            statusTitle.innerHTML = '<i class="bi bi-check-circle-fill text-success me-1"></i> Perfectly Balanced!';
+            statusDesc.innerText = 'Your assets exactly equal your liabilities and promoter capital. Ready for analysis.';
+        } else {
+            badge.className = 'badge bg-warning text-dark px-3 py-2 fs-6 rounded-pill shadow-sm';
+            badge.innerText = 'Variance: ' + formatINR(variance);
+            statusTitle.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Balance Equation Variance Detected';
+            statusDesc.innerText = 'Assets (' + formatINR(totalAssets) + ') differ from Liabilities & Equity (' + formatINR(totalLiabilities) + ') by ' + formatINR(variance) + '.';
+        }
+    }
+
+    // Live Profit & Loss Calculations
+    function updatePLCalc() {
+        const sales = getVal('sales');
+        const prodCost = getVal('production_cost');
+        const salary = getVal('salary');
+        const overheads = getVal('overheads');
+        const otherExp = getVal('other_expenses');
+
+        const grossProfit = sales - prodCost;
+        const totalOverheads = salary + overheads + otherExp;
+        const netProfit = grossProfit - totalOverheads;
+
+        const grossMargin = sales > 0 ? (grossProfit / sales * 100).toFixed(1) : '0.0';
+        const netMargin = sales > 0 ? (netProfit / sales * 100).toFixed(1) : '0.0';
+
+        const liveGrossEl = document.getElementById('liveGrossProfit');
+        const liveGrossMarginEl = document.getElementById('liveGrossMargin');
+        const liveNetEl = document.getElementById('liveNetProfit');
+        const liveNetMarginEl = document.getElementById('liveNetMargin');
+
+        if (liveGrossEl) liveGrossEl.innerText = formatINR(grossProfit);
+        if (liveGrossMarginEl) liveGrossMarginEl.innerText = grossMargin + '%';
+        if (liveNetEl) liveNetEl.innerText = formatINR(netProfit);
+        if (liveNetMarginEl) liveNetMarginEl.innerText = netMargin + '%';
+
+        const grossHidden = document.getElementById('gross_profit_hidden');
+        const netHidden = document.getElementById('net_profit_hidden');
+        if (grossHidden) grossHidden.value = grossProfit;
+        if (netHidden) netHidden.value = netProfit;
+
+        const badge = document.getElementById('marginScoreBadge');
+        const title = document.getElementById('marginDiagnosticTitle');
+        const desc = document.getElementById('marginDiagnosticDesc');
+
+        if (!badge) return;
+
+        if (sales === 0) {
+            badge.className = 'badge bg-secondary px-3 py-2 fs-6 rounded-pill';
+            badge.innerText = 'Pending Inputs';
+            title.innerHTML = '<i class="bi bi-speedometer me-1"></i> Profitability Diagnostic';
+            desc.innerText = 'Enter your sales and overheads to calculate operational efficiency.';
+        } else if (netProfit < 0) {
+            badge.className = 'badge bg-danger text-white px-3 py-2 fs-6 rounded-pill';
+            badge.innerText = 'Net Operating Loss (' + netMargin + '%)';
+            title.innerHTML = '<i class="bi bi-exclamation-octagon-fill text-danger me-1"></i> Negative Net Margins';
+            desc.innerText = 'Overheads exceed gross profits. Focus on cost optimization or price adjustments.';
+        } else if (parseFloat(netMargin) >= 15) {
+            badge.className = 'badge bg-success text-white px-3 py-2 fs-6 rounded-pill';
+            badge.innerText = 'Prime Margin: ' + netMargin + '%';
+            title.innerHTML = '<i class="bi bi-stars text-success me-1"></i> Excellent Profitability';
+            desc.innerText = 'Your business delivers strong net margin resilience exceeding typical MSME benchmarks.';
+        } else {
+            badge.className = 'badge bg-info text-dark px-3 py-2 fs-6 rounded-pill';
+            badge.innerText = 'Moderate: ' + netMargin + '%';
+            title.innerHTML = '<i class="bi bi-check-circle-fill text-info me-1"></i> Positive Operational Margin';
+            desc.innerText = 'Operations are generating net profits. Review fixed overheads to expand margins.';
+        }
+    }
+
+    // Event Listeners Initialization
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.calc-trigger').forEach(input => {
+            input.addEventListener('input', updateBalanceSheetCalc);
+        });
+
+        document.querySelectorAll('.pl-trigger').forEach(input => {
+            input.addEventListener('input', updatePLCalc);
+        });
+
+        // Run initial calculations on load
+        updateBalanceSheetCalc();
+        updatePLCalc();
+
+        // Open initial step (1, 2, or 3)
+        goToStep(currentStep);
+    });
+</script>
+{% endblock %}
